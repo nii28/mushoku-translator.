@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLA Translator Master - Mushoku Edition</title>
+    <title>SOLA Translator Master - Gemini 2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
         :root {
             --mana-blue: #4facfe;
             --magic-gold: #ffd700;
-            --glass: rgba(15, 23, 42, 0.95);
+            --glass: rgba(15, 23, 42, 0.96);
         }
 
         body {
@@ -21,36 +21,21 @@
             background: #0f172a no-repeat center center / cover;
             overflow: hidden;
             color: #e2e8f0;
-            transition: background 1s ease;
         }
 
         .overlay {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, transparent, rgba(15, 23, 42, 0.9));
+            background: radial-gradient(circle at center, transparent, rgba(15, 23, 42, 0.95));
             pointer-events: none;
             z-index: 1;
         }
 
         .glass {
             background: var(--glass);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
             border-radius: 24px;
-        }
-
-        .magic-toolbar {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            display: flex;
-            gap: 12px;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.8);
-            padding: 10px;
-            border-radius: 40px;
-            border: 1.5px solid var(--magic-gold);
-            backdrop-filter: blur(10px);
         }
 
         .nav-btn {
@@ -62,45 +47,78 @@
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .nav-btn.active {
             background: linear-gradient(135deg, var(--mana-blue), #8e2de2);
             color: white;
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.4);
-            transform: translateX(5px);
+            box-shadow: 0 0 25px rgba(79, 172, 254, 0.35);
         }
 
         .magic-input {
-            background: rgba(0,0,0,0.6) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            color: white !important;
+            background: rgba(0,0,0,0.7) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            color: #f8fafc !important;
             border-radius: 16px !important;
         }
 
-        .section { display: none; height: 100%; animation: slideIn 0.5s ease; }
+        .section { display: none; height: 100%; animation: fadeIn 0.4s ease-out; }
         .section.active { display: flex; flex-direction: column; }
 
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .btn-gold {
             background: var(--magic-gold);
             color: #0f172a;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             transition: all 0.3s;
         }
 
         .btn-gold:hover {
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            transform: scale(1.01);
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--mana-blue); border-radius: 10px; }
+        /* Toolbar ở góc */
+        .magic-controls {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--magic-gold);
+            color: var(--magic-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn:hover {
+            background: var(--magic-gold);
+            color: #0f172a;
+            transform: translateY(-5px);
+        }
+
+        .mana-particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            filter: blur(1px);
+        }
     </style>
 </head>
 <body class="flex">
@@ -108,133 +126,135 @@
     <div class="overlay"></div>
     <div id="mana-bg" class="fixed inset-0 pointer-events-none z-0"></div>
 
-    <!-- MAGIC TOOLBAR -->
-    <div class="magic-toolbar">
-        <button onclick="location.reload()" class="p-2 text-yellow-400 hover:rotate-180 transition-all duration-700" title="Làm mới ma pháp">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+    <!-- NÚT CHỨC NĂNG GÓC DƯỚI -->
+    <div class="magic-controls">
+        <button onclick="location.reload()" class="control-btn" title="Làm mới trang">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
         </button>
-        <button onclick="toggleFS()" class="p-2 text-blue-400 hover:scale-125 transition-transform" title="Toàn màn hình">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        <button onclick="toggleFullScreen()" class="control-btn" title="Toàn màn hình">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
         </button>
     </div>
 
     <!-- SIDEBAR -->
-    <aside class="w-72 glass m-5 p-8 z-10 flex flex-col shadow-2xl">
+    <aside class="w-72 glass m-5 p-8 z-10 flex flex-col shadow-2xl overflow-hidden">
         <div class="mb-12">
-            <h1 class="font-['Cinzel'] text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600 text-center">MUSHOKU</h1>
-            <p class="text-[10px] font-bold text-mana-blue tracking-[0.4em] text-center mt-1 uppercase opacity-80">Translator Master</p>
+            <h1 class="font-['Cinzel'] text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 to-yellow-600 text-center tracking-tighter">MUSHOKU</h1>
+            <p class="text-[10px] font-bold text-mana-blue tracking-[0.4em] text-center mt-2 uppercase opacity-70">2.5 Master Edition</p>
         </div>
         
         <nav class="flex flex-col gap-3">
             <div onclick="switchTab('home')" id="tab-home" class="nav-btn active"><span>🪄</span> Dịch Thuật</div>
-            <div onclick="switchTab('file')" id="tab-file" class="nav-btn"><span>📜</span> Cổ Thư</div>
-            <div onclick="switchTab('clean')" id="tab-clean" class="nav-btn"><span>🧹</span> Thanh Tẩy</div>
+            <div onclick="switchTab('analysis')" id="tab-analysis" class="nav-btn"><span>📜</span> Phân Tích Văn Học</div>
+            <div onclick="switchTab('file')" id="tab-file" class="nav-btn"><span>📖</span> Cổ Thư EPUB</div>
+            <div onclick="switchTab('clean')" id="tab-clean" class="nav-btn"><span>🧹</span> Thanh Tẩy Raw</div>
             <div onclick="switchTab('setup')" id="tab-setup" class="nav-btn"><span>⚙️</span> Cấu Hình</div>
         </nav>
 
-        <div class="mt-auto text-center">
-            <div class="h-px bg-white/10 mb-4"></div>
-            <p class="text-[9px] opacity-30 tracking-widest uppercase font-bold">Serious in another world</p>
+        <div class="mt-auto pt-6 border-t border-white/5 text-center">
+            <p class="text-[9px] opacity-20 tracking-widest uppercase font-black">SOLA STUDIO • 2025</p>
         </div>
     </aside>
 
-    <!-- MAIN AREA -->
+    <!-- MAIN -->
     <main class="flex-1 p-5 z-10 overflow-hidden relative">
         
-        <!-- Tab: Dịch thuật tức thời -->
+        <!-- Tab: Dịch thuật trực tiếp -->
         <div id="sec-home" class="section active">
             <div class="glass p-8 h-full flex flex-col gap-5">
                 <div class="flex justify-between items-center">
-                    <h2 class="font-['Cinzel'] text-xl text-white font-bold">Ma Pháp Trực Tuyến</h2>
-                    <span class="text-[10px] text-mana-blue font-bold uppercase tracking-widest">Live Mode</span>
+                    <h2 class="font-['Cinzel'] text-xl text-white font-bold flex items-center gap-3">
+                        Dịch Thuật Trực Tiếp <span class="text-[10px] bg-mana-blue/20 text-mana-blue px-2 py-1 rounded">Flash Mode</span>
+                    </h2>
                 </div>
-                <input id="prompt" type="text" placeholder="Ghi chú bối cảnh hoặc phong cách dịch..." class="magic-input p-4 w-full outline-none focus:border-mana-blue transition-colors">
+                <input id="prompt" type="text" placeholder="Bối cảnh (Ví dụ: Rudeus gặp gỡ Roxy...)" class="magic-input p-4 w-full outline-none focus:border-mana-blue">
                 <div class="grid grid-cols-2 gap-6 flex-1 overflow-hidden">
-                    <textarea id="input" class="magic-input p-5 resize-none text-lg leading-relaxed" placeholder="Dán văn bản Raw..."></textarea>
-                    <div id="output" class="magic-input p-5 overflow-y-auto whitespace-pre-wrap italic text-yellow-100/90 leading-relaxed text-lg border-mana-blue/20">Kết quả dịch thuật sẽ hiện tại đây...</div>
+                    <textarea id="input" class="magic-input p-5 resize-none text-lg leading-relaxed font-medium" placeholder="Dán văn bản Nhật/Trung..."></textarea>
+                    <div id="output" class="magic-input p-5 overflow-y-auto whitespace-pre-wrap leading-relaxed text-lg border-mana-blue/20 font-medium"></div>
                 </div>
-                <button onclick="doTranslate()" class="btn-gold py-5 rounded-2xl text-lg shadow-lg">Kích hoạt Mana</button>
+                <button onclick="callGemini('direct')" id="btn-direct" class="btn-gold py-5 rounded-2xl text-lg shadow-xl">Triệu Hồi Bản Dịch</button>
             </div>
         </div>
 
-        <!-- Tab: Dịch cổ thư (EPUB/TXT) -->
+        <!-- Tab: Phân Tích Văn Học -->
+        <div id="sec-analysis" class="section">
+            <div class="glass p-8 h-full flex flex-col gap-5">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-['Cinzel'] text-xl text-yellow-400 font-bold">Phân Tích & Trau Chuốt</h2>
+                </div>
+                <div class="grid grid-cols-2 gap-6 flex-1 overflow-hidden">
+                    <textarea id="analysis-input" class="magic-input p-5 resize-none text-lg leading-relaxed font-medium" placeholder="Dán đoạn văn quan trọng cần trau chuốt từng chữ..."></textarea>
+                    <div id="analysis-output" class="magic-input p-5 overflow-y-auto leading-relaxed text-lg border-yellow-500/20 font-medium italic"></div>
+                </div>
+                <button onclick="callGemini('analyze')" id="btn-analyze" class="btn-gold py-5 rounded-2xl text-lg shadow-xl bg-gradient-to-r from-yellow-700 to-yellow-500">Khai Mở Tinh Hoa Văn Học</button>
+            </div>
+        </div>
+
+        <!-- Tab: Cổ thư EPUB -->
         <div id="sec-file" class="section">
             <div class="glass p-8 h-full flex flex-col gap-6">
-                <h2 class="font-['Cinzel'] text-xl text-white font-bold">Giải Mã Cổ Thư</h2>
-                <div class="border-2 border-dashed border-mana-blue/30 rounded-3xl p-12 text-center cursor-pointer hover:bg-mana-blue/5 transition-all group" onclick="document.getElementById('f').click()">
+                <h2 class="font-['Cinzel'] text-xl text-white font-bold">Trích Xuất Cổ Thư</h2>
+                <div class="border-2 border-dashed border-mana-blue/20 rounded-3xl p-16 text-center cursor-pointer hover:bg-mana-blue/5 transition-all" onclick="document.getElementById('f').click()">
                     <input type="file" id="f" class="hidden" accept=".epub,.txt" onchange="loadFile(this, 'preview')">
-                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📖</div>
-                    <p class="text-mana-blue font-bold text-lg uppercase tracking-wider">Chọn tệp EPUB hoặc TXT</p>
-                    <p id="fname" class="text-xs mt-3 opacity-60 italic font-medium">Hỗ trợ trích xuất văn bản từ ebook</p>
+                    <div class="text-6xl mb-4">📖</div>
+                    <p class="text-mana-blue font-bold text-lg uppercase">Nạp file EPUB / TXT</p>
+                    <p id="fname" class="text-xs mt-2 opacity-50 italic">Tự động lấy văn bản từ Ebook</p>
                 </div>
-                <div class="flex-1 flex flex-col min-h-0">
-                    <p class="text-[10px] text-mana-blue font-bold mb-2 uppercase tracking-widest">Nội dung trích xuất</p>
-                    <div id="preview" class="flex-1 magic-input p-6 overflow-y-auto text-md leading-relaxed text-slate-300">Nội dung cổ thư sẽ được hiển thị tại đây để bạn kiểm tra trước khi dịch...</div>
-                </div>
+                <div id="preview" class="flex-1 magic-input p-6 overflow-y-auto text-sm leading-relaxed text-slate-400">Văn bản trích xuất sẽ hiện ở đây...</div>
             </div>
         </div>
 
-        <!-- Tab: Thanh tẩy (Clean Raw) -->
+        <!-- Tab: Thanh tẩy -->
         <div id="sec-clean" class="section">
             <div class="glass p-8 h-full flex flex-col gap-6">
                 <div class="flex justify-between items-center">
                     <h2 class="font-['Cinzel'] text-xl text-white font-bold">Thanh Tẩy Tạp Chất</h2>
-                    <button onclick="document.getElementById('clean-f').click()" class="text-xs bg-mana-blue/20 text-mana-blue px-4 py-2 rounded-full border border-mana-blue/30 hover:bg-mana-blue/40 transition-all font-bold">NẠP EPUB ĐỂ LỌC</button>
+                    <button onclick="document.getElementById('clean-f').click()" class="text-[10px] bg-mana-blue/10 text-mana-blue px-4 py-2 rounded-full border border-mana-blue/20 font-black tracking-widest">NẠP EPUB</button>
                     <input type="file" id="clean-f" class="hidden" accept=".epub" onchange="loadFile(this, 'clean')">
                 </div>
-                <textarea id="clean-in" class="flex-1 magic-input p-6 resize-none leading-loose text-lg" placeholder="Dán văn bản hoặc nạp file EPUB để tự động lấy text..."></textarea>
+                <textarea id="clean-in" class="flex-1 magic-input p-6 resize-none leading-loose text-lg" placeholder="Dán raw..."></textarea>
                 <div class="grid grid-cols-2 gap-6">
-                    <button onclick="runClean('ja')" class="btn-gold py-4 rounded-xl text-sm">Chỉ giữ Tiếng Nhật (Hiragana/Katakana/Kanji)</button>
-                    <button onclick="runClean('zh')" class="btn-gold py-4 rounded-xl text-sm">Chỉ giữ Tiếng Trung (Hanzi)</button>
-                </div>
-                <div class="text-center">
-                    <button onclick="downloadCleaned()" class="text-[10px] text-blue-400 uppercase font-black tracking-[0.3em] hover:text-white transition-colors">Tải xuống bản sạch (.txt)</button>
+                    <button onclick="runClean('ja')" class="btn-gold py-4 rounded-xl text-sm">Chỉ giữ Tiếng Nhật</button>
+                    <button onclick="runClean('zh')" class="btn-gold py-4 rounded-xl text-sm">Chỉ giữ Tiếng Trung</button>
                 </div>
             </div>
         </div>
 
         <!-- Tab: Cấu hình -->
         <div id="sec-setup" class="section">
-            <div class="glass p-10 max-w-3xl mx-auto flex flex-col gap-8 shadow-inner border-mana-blue/10 mt-10">
+            <div class="glass p-12 max-w-2xl mx-auto flex flex-col gap-8 mt-10">
                 <div class="text-center">
-                    <h2 class="font-['Cinzel'] text-2xl text-magic-gold font-black mb-2">Cấu Hình Ma Pháp</h2>
-                    <p class="text-xs opacity-50 uppercase tracking-widest">Thiết lập kết nối với thế giới bên kia</p>
+                    <h2 class="font-['Cinzel'] text-2xl text-magic-gold font-black">Cài Đặt Hệ Thống</h2>
                 </div>
-
-                <div class="space-y-6">
-                    <div>
-                        <label class="block mb-3 font-bold text-mana-blue text-sm uppercase tracking-wider">🔑 Gemini API Key (Cá nhân)</label>
-                        <input type="password" id="key" class="magic-input p-4 w-full outline-none focus:border-mana-blue" placeholder="Nhập mã bí mật từ Google AI Studio...">
-                    </div>
-                    <div>
-                        <label class="block mb-3 font-bold text-purple-400 text-sm uppercase tracking-wider">🖼️ Ảnh nền thế giới (Background)</label>
-                        <div class="flex items-center gap-4">
-                            <button onclick="document.getElementById('bg-f').click()" class="flex-1 bg-white/5 border border-white/10 p-4 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">CHỌN ẢNH TỪ MÁY</button>
-                            <input type="file" id="bg-f" accept="image/*" onchange="setBg(this)" class="hidden">
-                            <button onclick="resetBg()" class="px-6 py-4 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">RESET</button>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block mb-3 font-bold text-mana-blue text-xs uppercase tracking-widest">🔑 Gemini API Key</label>
+                    <input type="password" id="key" class="magic-input p-4 w-full outline-none" placeholder="Nhập Key từ Google AI Studio...">
                 </div>
-
-                <div class="bg-black/40 p-6 rounded-2xl border border-white/5 mt-4">
-                    <p class="text-xs italic text-slate-400 leading-relaxed"><b>Ghi chú:</b> Dữ liệu của bạn (Key và Ảnh nền) được lưu trữ an toàn trong trình duyệt của bạn (LocalStorage). Chúng tôi không thu thập bất kỳ thông tin nào.</p>
+                <div>
+                    <label class="block mb-3 font-bold text-purple-400 text-xs uppercase tracking-widest">🖼️ Ảnh nền tùy chọn</label>
+                    <input type="file" id="bg-f" accept="image/*" onchange="setBg(this)" class="hidden">
+                    <button onclick="document.getElementById('bg-f').click()" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">THAY ĐỔI KHÔNG GIAN</button>
                 </div>
-
-                <button onclick="save()" class="btn-gold py-5 rounded-2xl text-lg mt-4 shadow-xl">Ghi nhớ cấu hình</button>
+                <button onclick="save()" class="btn-gold py-5 rounded-2xl text-lg mt-4">Lưu Ma Pháp</button>
             </div>
         </div>
-
     </main>
 
     <script>
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
         const defBg = "https://images8.alphacoders.com/112/1124234.jpg";
         
         window.onload = () => {
             const bg = localStorage.getItem('sola_bg') || defBg;
             document.body.style.backgroundImage = `url('${bg}')`;
             document.getElementById('key').value = localStorage.getItem('sola_key') || '';
-            startMana();
+            startParticles();
         };
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
 
         function switchTab(id) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -245,7 +265,6 @@
 
         function setBg(input) {
             const file = input.files[0];
-            if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 localStorage.setItem('sola_bg', e.target.result);
@@ -254,113 +273,107 @@
             reader.readAsDataURL(file);
         }
 
-        function resetBg() {
-            localStorage.removeItem('sola_bg');
-            document.body.style.backgroundImage = `url('${defBg}')`;
-        }
-
         function save() {
             localStorage.setItem('sola_key', document.getElementById('key').value.trim());
-            alert("✨ Cấu hình ma pháp đã được phong ấn thành công!");
-        }
-
-        function toggleFS() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
+            alert("✨ Đã phong ấn cài đặt!");
         }
 
         async function loadFile(input, mode) {
             const file = input.files[0];
             if(!file) return;
-            
-            let fullText = "";
+            let text = "";
             if(file.name.endsWith('.epub')) {
-                try {
-                    const zip = await JSZip.loadAsync(file);
-                    const files = Object.keys(zip.files).filter(f => f.endsWith('.xhtml') || f.endsWith('.html')).sort();
-                    for (let f of files) {
-                        const h = await zip.files[f].async("text");
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(h, 'text/html');
-                        fullText += doc.body.innerText + "\n\n";
-                    }
-                } catch(e) { alert("Lỗi đọc file EPUB!"); return; }
-            } else {
-                fullText = await file.text();
-            }
+                const zip = await JSZip.loadAsync(file);
+                const files = Object.keys(zip.files).filter(f => f.endsWith('.xhtml') || f.endsWith('.html')).sort();
+                for (let f of files) {
+                    const h = await zip.files[f].async("text");
+                    text += new DOMParser().parseFromString(h, 'text/html').body.innerText + "\n\n";
+                }
+            } else text = await file.text();
 
             if(mode === 'preview') {
                 document.getElementById('fname').innerText = file.name;
-                document.getElementById('preview').innerText = fullText;
-            } else {
-                document.getElementById('clean-in').value = fullText;
-            }
+                document.getElementById('preview').innerText = text;
+            } else document.getElementById('clean-in').value = text;
         }
 
-        async function doTranslate() {
+        async function callGemini(type) {
             const k = localStorage.getItem('sola_key');
-            const i = document.getElementById('input').value.trim();
-            if(!k) { switchTab('setup'); return alert("Vui lòng cấu hình API Key!"); }
-            if(!i) return alert("Nhập văn bản cần dịch!");
-            
-            const out = document.getElementById('output');
-            out.innerText = "Đang triệu hồi tri thức...";
-            
+            if(!k) return switchTab('setup');
+
+            const btn = document.getElementById(type === 'direct' ? 'btn-direct' : 'btn-analyze');
+            const output = document.getElementById(type === 'direct' ? 'output' : 'analysis-output');
+            const input = document.getElementById(type === 'direct' ? 'input' : 'analysis-input').value.trim();
+            const pmt = document.getElementById('prompt').value;
+
+            if(!input) return;
+            btn.disabled = true;
+            btn.innerText = "Đang kết nối Mana...";
+            output.innerText = "...";
+
+            let system = "";
+            if(type === 'direct') {
+                system = `BẠN LÀ MỘT CỐI MÁY DỊCH THUẬT LIGHT NOVEL SIÊU CẤP.
+                NHIỆM VỤ: Dịch văn bản Nhật/Trung sang tiếng Việt mượt mà theo phong cách Mushoku Tensei.
+                QUY TẮC NGHIÊM NGẶT:
+                1. Dịch TRỰC TIẾP, không phân tích, không giải thích, không thêm bất kỳ ghi chú nào.
+                2. Tuyệt đối không sử dụng dấu sao (*) để in đậm hay nhấn mạnh.
+                3. Giữ nguyên định dạng đoạn văn.
+                Bối cảnh: ${pmt}`;
+            } else {
+                system = `BẠN LÀ BIÊN TẬP VIÊN VĂN HỌC CAO CẤP.
+                NHIỆM VỤ: Phân tích tâm lý nhân vật, ngữ cảnh và đưa ra bản dịch hay nhất.
+                CẤU TRÚC TRẢ VỀ:
+                - Bản dịch trau chuốt (văn phong bay bổng).
+                - Phân tích ngắn gọn về cảm xúc hoặc ẩn dụ trong đoạn văn.
+                QUY TẮC: Không sử dụng dấu sao (*) để định dạng văn bản.`;
+            }
+
             try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, {
+                const r = await fetch(`${API_URL}?key=${k}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: `Dịch sang tiếng Việt phong cách văn học Light Novel: ${i}\nLưu ý bối cảnh: ${document.getElementById('prompt').value}` }] }] })
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: input }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
                 });
                 const d = await r.json();
-                out.innerText = d.candidates[0].content.parts[0].text;
+                let txt = d.candidates[0].content.parts[0].text;
+                output.innerText = txt.replace(/\*/g, '');
             } catch(e) { 
-                out.innerText = "⚠️ Kết nối mana thất bại. Vui lòng kiểm tra lại API Key hoặc mạng!";
+                output.innerText = "⚠️ Lỗi Mana: Hãy kiểm tra Key hoặc đường truyền!";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = type === 'direct' ? 'Triệu Hồi Bản Dịch' : 'Khai Mở Tinh Hoa Văn Học';
             }
         }
 
         function runClean(mode) {
             const val = document.getElementById('clean-in').value;
-            if(!val) return alert("Chưa có nội dung để thanh tẩy!");
-            // Regex cho Nhật: Hiragana, Katakana, Kanji và dấu câu cơ bản
-            // Regex cho Trung: Toàn bộ Hanzi
             const reg = mode === 'ja' ? /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s\d.,!?"'()-]/g : /[\u4E00-\u9FFF\s\d.,!?"'()-]/g;
-            const cleaned = (val.match(reg) || []).join('');
-            document.getElementById('clean-in').value = cleaned;
+            document.getElementById('clean-in').value = (val.match(reg) || []).join('');
         }
 
-        function downloadCleaned() {
-            const txt = document.getElementById('clean-in').value;
-            if(!txt) return;
-            const b = new Blob([txt], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(b);
-            a.download = `Purified_Text_${Date.now()}.txt`;
-            a.click();
-        }
-
-        // Particle Mana BG Effect
-        function startMana() {
+        function startParticles() {
             const bg = document.getElementById('mana-bg');
             setInterval(() => {
-                const s = document.createElement('div');
-                s.style.position = 'absolute';
-                s.style.width = '2px';
-                s.style.height = '2px';
-                s.style.background = Math.random() > 0.5 ? '#4facfe' : '#ffd700';
-                s.style.left = Math.random() * 100 + 'vw';
-                s.style.top = '100vh';
-                s.style.borderRadius = '50%';
-                s.style.boxShadow = `0 0 10px ${s.style.background}`;
-                s.animate([
-                    { transform: 'translateY(0) scale(1)', opacity: 0.8 },
-                    { transform: 'translateY(-100vh) scale(0)', opacity: 0 }
-                ], { duration: 6000 + Math.random() * 4000 });
-                bg.appendChild(s);
-                setTimeout(() => s.remove(), 10000);
-            }, 600);
+                const p = document.createElement('div');
+                p.className = 'mana-particle';
+                const size = Math.random() * 3 + 1;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.background = Math.random() > 0.5 ? '#4facfe' : '#ffd700';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = '100vh';
+                p.style.boxShadow = `0 0 8px ${p.style.background}`;
+                p.animate([{ transform: 'translateY(0)', opacity: 0.6 }, { transform: 'translateY(-100vh)', opacity: 0 }], { duration: 7000 });
+                bg.appendChild(p);
+                setTimeout(() => p.remove(), 8000);
+            }, 700);
         }
     </script>
 </body>
 </html>
 
+                
