@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLA Translator Master - Universal 2.5</title>
+    <title>SOLA Translator Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
@@ -36,6 +36,7 @@
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 215, 0, 0.15);
             border-radius: 24px;
+            position: relative;
         }
 
         .nav-btn {
@@ -48,6 +49,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            user-select: none;
         }
 
         .nav-btn.active {
@@ -61,12 +63,13 @@
             border: 1px solid rgba(255,255,255,0.08) !important;
             color: #f8fafc !important;
             border-radius: 16px !important;
+            outline: none;
         }
 
         .section { display: none; height: 100%; animation: fadeIn 0.4s ease-out; }
         .section.active { display: flex; flex-direction: column; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .btn-gold {
             background: var(--magic-gold);
@@ -75,11 +78,17 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             transition: all 0.3s;
+            cursor: pointer;
         }
 
-        .btn-gold:hover {
+        .btn-gold:hover:not(:disabled) {
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
             transform: scale(1.01);
+        }
+
+        .btn-gold:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .magic-controls {
@@ -109,7 +118,6 @@
         .control-btn:hover {
             background: var(--magic-gold);
             color: #0f172a;
-            transform: translateY(-5px);
         }
 
         .lang-select {
@@ -119,13 +127,10 @@
             padding: 8px 12px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: bold;
-            outline: none;
             cursor: pointer;
         }
 
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--mana-blue); border-radius: 10px; }
     </style>
 </head>
@@ -134,34 +139,30 @@
     <div class="overlay"></div>
     <div id="mana-bg" class="fixed inset-0 pointer-events-none z-0"></div>
 
-    <!-- NÚT ĐIỀU KHIỂN -->
+    <!-- FLOATING TOOLS -->
     <div class="magic-controls">
-        <button onclick="location.reload()" class="control-btn" title="Làm mới ma pháp">
+        <button onclick="window.location.reload()" class="control-btn" title="Làm mới trang">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
         </button>
-        <button onclick="toggleFullScreen()" class="control-btn" title="Toàn màn hình">
+        <button onclick="toggleFS()" class="control-btn" title="Toàn màn hình">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
         </button>
     </div>
 
     <!-- SIDEBAR -->
-    <aside class="w-72 glass m-5 p-8 z-10 flex flex-col shadow-2xl overflow-hidden">
+    <aside class="w-72 glass m-5 p-8 z-10 flex flex-col shadow-2xl">
         <div class="mb-12 text-center">
-            <h1 class="font-['Cinzel'] text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 to-yellow-600 tracking-tighter">SOLA MASTER</h1>
-            <p class="text-[10px] font-bold text-mana-blue tracking-[0.4em] mt-2 uppercase opacity-70">Universal 2.5</p>
+            <h1 class="font-['Cinzel'] text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 to-yellow-600">SOLA</h1>
+            <p class="text-[10px] font-bold text-mana-blue tracking-[0.4em] mt-2 uppercase">Universal 2.5</p>
         </div>
         
         <nav class="flex flex-col gap-3">
             <div onclick="switchTab('home')" id="tab-home" class="nav-btn active"><span>🪄</span> Dịch Thuật</div>
-            <div onclick="switchTab('analysis')" id="tab-analysis" class="nav-btn"><span>📜</span> Phân Tích Văn Học</div>
+            <div onclick="switchTab('analysis')" id="tab-analysis" class="nav-btn"><span>📜</span> Văn Học</div>
             <div onclick="switchTab('file')" id="tab-file" class="nav-btn"><span>📖</span> Cổ Thư EPUB</div>
-            <div onclick="switchTab('clean')" id="tab-clean" class="nav-btn"><span>🧹</span> Thanh Tẩy Raw</div>
+            <div onclick="switchTab('clean')" id="tab-clean" class="nav-btn"><span>🧹</span> Thanh Tẩy</div>
             <div onclick="switchTab('setup')" id="tab-setup" class="nav-btn"><span>⚙️</span> Cấu Hình</div>
         </nav>
-
-        <div class="mt-auto pt-6 border-t border-white/5 text-center">
-            <p class="text-[9px] opacity-20 tracking-widest uppercase font-black">Multi-Language & EPUB Support</p>
-        </div>
     </aside>
 
     <!-- MAIN -->
@@ -171,130 +172,106 @@
         <div id="sec-home" class="section active">
             <div class="glass p-8 h-full flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h2 class="font-['Cinzel'] text-xl text-white font-bold">Ma Pháp Dịch Thuật</h2>
+                    <h2 class="font-['Cinzel'] text-xl text-white font-bold">Dịch Thuật Đa Quốc Gia</h2>
                     <div class="flex items-center gap-2">
                         <select id="home-from" class="lang-select">
                             <option value="Tự động">Tự động</option>
                             <option value="Tiếng Nhật">Tiếng Nhật</option>
                             <option value="Tiếng Trung">Tiếng Trung</option>
-                            <option value="Tiếng Anh">Tiếng Anh</option>
                             <option value="Tiếng Hàn">Tiếng Hàn</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
                         </select>
                         <span class="text-mana-blue">➔</span>
                         <select id="home-to" class="lang-select">
                             <option value="Tiếng Việt">Tiếng Việt</option>
                             <option value="Tiếng Nhật">Tiếng Nhật</option>
                             <option value="Tiếng Trung">Tiếng Trung</option>
-                            <option value="Tiếng Anh">Tiếng Anh</option>
                             <option value="Tiếng Hàn">Tiếng Hàn</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
                         </select>
                     </div>
                 </div>
-                <input id="prompt" type="text" placeholder="Bối cảnh/Phong cách (VD: Phong cách Rudeus nói chuyện với Roxy...)" class="magic-input p-3 w-full outline-none">
+                <input id="prompt" type="text" placeholder="Bối cảnh (Ví dụ: Rudeus gặp Roxy...)" class="magic-input p-3 w-full">
                 <div class="grid grid-cols-2 gap-6 flex-1 overflow-hidden">
-                    <textarea id="input" class="magic-input p-5 resize-none text-lg leading-relaxed" placeholder="Dán văn bản gốc..."></textarea>
-                    <div id="output" class="magic-input p-5 overflow-y-auto whitespace-pre-wrap leading-relaxed text-lg border-mana-blue/20"></div>
+                    <textarea id="input" class="magic-input p-5 resize-none text-lg" placeholder="Dán văn bản..."></textarea>
+                    <div id="output" class="magic-input p-5 overflow-y-auto whitespace-pre-wrap text-lg"></div>
                 </div>
-                <button onclick="callGemini('direct')" id="btn-direct" class="btn-gold py-5 rounded-2xl text-lg shadow-xl">Triệu Hồi Bản Dịch</button>
+                <button onclick="handleTranslate('direct')" id="btn-direct" class="btn-gold py-5 rounded-2xl">Bắt Đầu Dịch</button>
             </div>
         </div>
 
-        <!-- Tab: Phân Tích Văn Học -->
+        <!-- Tab: Phân Tích -->
         <div id="sec-analysis" class="section">
             <div class="glass p-8 h-full flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h2 class="font-['Cinzel'] text-xl text-yellow-400 font-bold">Phân Tích & Trau Chuốt</h2>
+                    <h2 class="font-['Cinzel'] text-xl text-yellow-400 font-bold">Phân Tích Văn Chương</h2>
                     <select id="analysis-lang" class="lang-select">
                         <option value="Tiếng Việt">Sang Tiếng Việt</option>
                         <option value="Tiếng Nhật">Sang Tiếng Nhật</option>
-                        <option value="Tiếng Trung">Sang Tiếng Trung</option>
-                        <option value="Tiếng Anh">Sang Tiếng Anh</option>
-                        <option value="Tiếng Hàn">Sang Tiếng Hàn</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-6 flex-1 overflow-hidden">
-                    <textarea id="analysis-input" class="magic-input p-5 resize-none text-lg leading-relaxed" placeholder="Dán đoạn văn cần phân tích chuyên sâu..."></textarea>
-                    <div id="analysis-output" class="magic-input p-5 overflow-y-auto leading-relaxed text-lg border-yellow-500/20 italic"></div>
+                    <textarea id="analysis-input" class="magic-input p-5 resize-none text-lg" placeholder="Dán đoạn văn quan trọng..."></textarea>
+                    <div id="analysis-output" class="magic-input p-5 overflow-y-auto italic text-lg"></div>
                 </div>
-                <button onclick="callGemini('analyze')" id="btn-analyze" class="btn-gold py-5 rounded-2xl text-lg shadow-xl bg-gradient-to-r from-yellow-700 to-yellow-500">Khai Mở Tinh Hoa</button>
+                <button onclick="handleTranslate('analyze')" id="btn-analyze" class="btn-gold py-5 rounded-2xl bg-gradient-to-r from-yellow-700 to-yellow-500">Phân Tích Ngay</button>
             </div>
         </div>
 
-        <!-- Tab: Cổ thư EPUB -->
+        <!-- Tab: EPUB -->
         <div id="sec-file" class="section">
             <div class="glass p-8 h-full flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-['Cinzel'] text-xl text-white font-bold">Cổ Thư EPUB</h2>
-                    <select id="file-to" class="lang-select">
-                        <option value="Tiếng Việt">Dịch sang Tiếng Việt</option>
-                        <option value="Tiếng Anh">Dịch sang Tiếng Anh</option>
-                    </select>
+                <h2 class="font-['Cinzel'] text-xl text-white font-bold">Trích Xuất Cổ Thư</h2>
+                <div class="border-2 border-dashed border-mana-blue/20 rounded-3xl p-10 text-center cursor-pointer hover:bg-mana-blue/5" onclick="document.getElementById('epub-input').click()">
+                    <input type="file" id="epub-input" class="hidden" accept=".epub,.txt" onchange="processEpub(this, 'preview')">
+                    <p class="text-4xl">📘</p>
+                    <p class="text-mana-blue font-bold mt-2 uppercase">CHỌN FILE EPUB / TXT</p>
                 </div>
-                <div class="border-2 border-dashed border-mana-blue/20 rounded-3xl p-10 text-center cursor-pointer hover:bg-mana-blue/5 transition-all" onclick="document.getElementById('f').click()">
-                    <input type="file" id="f" class="hidden" accept=".epub,.txt" onchange="loadFile(this, 'preview')">
-                    <div class="text-5xl mb-2">📖</div>
-                    <p class="text-mana-blue font-bold uppercase">Nạp file EPUB / TXT</p>
-                </div>
-                <div id="preview" class="flex-1 magic-input p-5 overflow-y-auto text-sm leading-relaxed text-slate-400">Nội dung trích xuất...</div>
-                <button onclick="translateFileContent()" id="btn-file" class="btn-gold py-4 rounded-xl shadow-lg">Dịch Nội Dung Cổ Thư</button>
+                <div id="preview-box" class="flex-1 magic-input p-5 overflow-y-auto text-sm text-slate-400">Nội dung trích xuất sẽ hiện ở đây...</div>
+                <button onclick="translateEpub()" id="btn-epub" class="btn-gold py-4 rounded-xl">Dịch Nội Dung Này</button>
             </div>
         </div>
 
-        <!-- Tab: Thanh tẩy (Clean Raw) -->
+        <!-- Tab: Thanh tẩy -->
         <div id="sec-clean" class="section">
             <div class="glass p-8 h-full flex flex-col gap-6">
                 <div class="flex justify-between items-center">
                     <h2 class="font-['Cinzel'] text-xl text-white font-bold">Thanh Tẩy Tạp Chất</h2>
-                    <!-- Nút nạp file EPUB trong phần thanh tẩy -->
-                    <button onclick="document.getElementById('clean-epub-f').click()" class="text-[10px] bg-mana-blue/20 text-mana-blue px-4 py-2 rounded-full border border-mana-blue/40 font-black tracking-widest hover:bg-mana-blue/40 transition-all">NẠP FILE EPUB ĐỂ LẤY RAW</button>
-                    <input type="file" id="clean-epub-f" class="hidden" accept=".epub,.txt" onchange="loadFile(this, 'clean')">
+                    <button onclick="document.getElementById('clean-epub').click()" class="bg-mana-blue/20 text-mana-blue px-4 py-2 rounded-full text-[10px] font-black border border-mana-blue/30">NẠP EPUB LẤY RAW</button>
+                    <input type="file" id="clean-epub" class="hidden" accept=".epub,.txt" onchange="processEpub(this, 'clean')">
                 </div>
-                <textarea id="clean-in" class="flex-1 magic-input p-6 resize-none leading-loose text-lg" placeholder="Dán raw hoặc nạp file EPUB để tự động trích xuất văn bản..."></textarea>
+                <textarea id="clean-textarea" class="flex-1 magic-input p-6 resize-none text-lg" placeholder="Dán text hoặc nạp file EPUB..."></textarea>
                 <div class="grid grid-cols-4 gap-4">
-                    <button onclick="runClean('ja')" class="btn-gold py-3 rounded-xl text-[10px]">Chỉ giữ Nhật</button>
-                    <button onclick="runClean('zh')" class="btn-gold py-3 rounded-xl text-[10px]">Chỉ giữ Trung</button>
-                    <button onclick="runClean('en')" class="btn-gold py-3 rounded-xl text-[10px]">Chỉ giữ Anh</button>
-                    <button onclick="runClean('ko')" class="btn-gold py-3 rounded-xl text-[10px]">Chỉ giữ Hàn</button>
-                </div>
-                <div class="text-center">
-                    <button onclick="downloadCleaned()" class="text-[10px] text-blue-400 uppercase font-bold tracking-[0.2em] hover:text-white">Tải về bản sạch (.txt)</button>
+                    <button onclick="purify('ja')" class="btn-gold py-3 rounded-xl text-[10px]">Lọc Nhật</button>
+                    <button onclick="purify('zh')" class="btn-gold py-3 rounded-xl text-[10px]">Lọc Trung</button>
+                    <button onclick="purify('en')" class="btn-gold py-3 rounded-xl text-[10px]">Lọc Anh</button>
+                    <button onclick="purify('ko')" class="btn-gold py-3 rounded-xl text-[10px]">Lọc Hàn</button>
                 </div>
             </div>
         </div>
 
-        <!-- Tab: Cấu hình -->
+        <!-- Tab: Setup -->
         <div id="sec-setup" class="section">
-            <div class="glass p-12 max-w-2xl mx-auto flex flex-col gap-8 mt-10">
-                <h2 class="font-['Cinzel'] text-2xl text-magic-gold font-black text-center">Cài Đặt Ma Pháp</h2>
-                <div>
-                    <label class="block mb-2 font-bold text-mana-blue text-xs uppercase">Gemini API Key</label>
-                    <input type="password" id="key" class="magic-input p-4 w-full outline-none" placeholder="Nhập Key từ Google AI Studio...">
-                </div>
-                <div>
-                    <label class="block mb-2 font-bold text-purple-400 text-xs uppercase">Hình nền không gian</label>
-                    <input type="file" id="bg-f" accept="image/*" onchange="setBg(this)" class="hidden">
-                    <button onclick="document.getElementById('bg-f').click()" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">CHỌN ẢNH TỪ MÁY</button>
-                </div>
-                <button onclick="save()" class="btn-gold py-5 rounded-2xl text-lg mt-4">Lưu Cấu Hình</button>
+            <div class="glass p-12 max-w-xl mx-auto flex flex-col gap-6 mt-10">
+                <h2 class="font-['Cinzel'] text-xl text-magic-gold font-bold text-center">Cấu Hình Mana</h2>
+                <input type="password" id="api-key" class="magic-input p-4 w-full" placeholder="Gemini API Key...">
+                <button onclick="document.getElementById('bg-input').click()" class="w-full bg-white/5 p-4 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10">THAY ĐỔI ẢNH NỀN</button>
+                <input type="file" id="bg-input" class="hidden" accept="image/*" onchange="updateBg(this)">
+                <button onclick="saveConfig()" class="btn-gold py-5 rounded-2xl">Lưu Cài Đặt</button>
             </div>
         </div>
     </main>
 
     <script>
+        // Cấu hình chung
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
-        const defBg = "https://images8.alphacoders.com/112/1124234.jpg";
         
         window.onload = () => {
-            const bg = localStorage.getItem('sola_bg') || defBg;
-            document.body.style.backgroundImage = `url('${bg}')`;
-            document.getElementById('key').value = localStorage.getItem('sola_key') || '';
-            startParticles();
+            const savedBg = localStorage.getItem('sola_bg');
+            if(savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
+            document.getElementById('api-key').value = localStorage.getItem('sola_key') || '';
+            initParticles();
         };
-
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        }
 
         function switchTab(id) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -303,7 +280,17 @@
             document.getElementById('sec-'+id).classList.add('active');
         }
 
-        function setBg(input) {
+        function toggleFS() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        function saveConfig() {
+            localStorage.setItem('sola_key', document.getElementById('api-key').value.trim());
+            alert("✨ Đã lưu!");
+        }
+
+        function updateBg(input) {
             const file = input.files[0];
             if(!file) return;
             const reader = new FileReader();
@@ -314,89 +301,120 @@
             reader.readAsDataURL(file);
         }
 
-        function save() {
-            localStorage.setItem('sola_key', document.getElementById('key').value.trim());
-            alert("✨ Đã phong ấn cài đặt!");
-        }
-
-        async function loadFile(input, mode) {
+        // Xử lý File EPUB chuyên sâu
+        async function processEpub(input, mode) {
             const file = input.files[0];
             if(!file) return;
-            let text = "";
+            let finalBody = "";
+
             if(file.name.endsWith('.epub')) {
                 try {
                     const zip = await JSZip.loadAsync(file);
-                    const files = Object.keys(zip.files).filter(f => f.endsWith('.xhtml') || f.endsWith('.html')).sort();
-                    for (let f of files) {
-                        const h = await zip.files[f].async("text");
-                        text += new DOMParser().parseFromString(h, 'text/html').body.innerText + "\n\n";
+                    const htmlFiles = Object.keys(zip.files).filter(f => f.match(/\.(xhtml|html)$/i)).sort();
+                    for(let path of htmlFiles) {
+                        const content = await zip.files[path].async("text");
+                        const doc = new DOMParser().parseFromString(content, 'text/html');
+                        finalBody += doc.body.innerText + "\n\n";
                     }
-                } catch(e) { alert("Lỗi trích xuất EPUB!"); return; }
-            } else text = await file.text();
-
-            if(mode === 'preview') {
-                document.getElementById('preview').innerText = text;
-            } else if(mode === 'clean') {
-                document.getElementById('clean-in').value = text;
+                } catch(e) { alert("Lỗi đọc file EPUB!"); return; }
+            } else {
+                finalBody = await file.text();
             }
+
+            if(mode === 'preview') document.getElementById('preview-box').innerText = finalBody;
+            else document.getElementById('clean-textarea').value = finalBody;
         }
 
-        async function callGemini(type) {
-            const k = localStorage.getItem('sola_key');
-            if(!k) return switchTab('setup');
+        // Logic Dịch thuật Chính
+        async function handleTranslate(type) {
+            const key = localStorage.getItem('sola_key');
+            if(!key) return switchTab('setup');
 
-            const btn = document.getElementById(type === 'direct' ? 'btn-direct' : 'btn-analyze');
-            const output = document.getElementById(type === 'direct' ? 'output' : 'analysis-output');
-            const input = document.getElementById(type === 'direct' ? 'input' : 'analysis-input').value.trim();
+            const isDirect = type === 'direct';
+            const btn = document.getElementById(isDirect ? 'btn-direct' : 'btn-analyze');
+            const output = document.getElementById(isDirect ? 'output' : 'analysis-output');
+            const input = document.getElementById(isDirect ? 'input' : 'analysis-input').value.trim();
+            const from = isDirect ? document.getElementById('home-from').value : "Tự động";
+            const to = isDirect ? document.getElementById('home-to').value : document.getElementById('analysis-lang').value;
             const pmt = document.getElementById('prompt').value;
-            
-            const fromLang = type === 'direct' ? document.getElementById('home-from').value : "Tự động";
-            const toLang = type === 'direct' ? document.getElementById('home-to').value : document.getElementById('analysis-lang').value;
 
             if(!input) return;
-            btn.disabled = true;
-            btn.innerText = "Đang triệu hồi tri thức...";
-            output.innerText = "...";
 
-            let system = "";
-            if(type === 'direct') {
-                system = `BẠN LÀ MỘT CÔNG CỤ DỊCH THUẬT LIGHT NOVEL CHUYÊN NGHIỆP.
-                NHIỆM VỤ: Dịch từ ${fromLang} sang ${toLang}.
-                QUY TẮC:
-                1. Dịch TRỰC TIẾP, không phân tích, không giải thích, không thêm ghi chú.
-                2. Tuyệt đối KHÔNG dùng dấu sao (*) để in đậm. Trả về text thuần.
-                3. Giữ nguyên tinh thần bản gốc. Phong cách: ${pmt || 'Văn học Light Novel'}.`;
-            } else {
-                system = `BẠN LÀ CHUYÊN GIA BIÊN TẬP VĂN HỌC.
-                NHIỆM VỤ: Dịch đoạn văn sau sang ${toLang} và đưa ra phân tích mượt mà nhất.
-                CẤU TRÚC TRẢ VỀ:
-                - Bản dịch trau chuốt (văn phong bay bổng).
-                - Một đoạn phân tích ngắn về cảm xúc hoặc ngữ cảnh ẩn dụ.
-                QUY TẮC: TUYỆT ĐỐI KHÔNG dùng dấu sao (*).`;
-            }
+            btn.disabled = true;
+            btn.innerText = "Đang triệu hồi...";
+            output.innerText = "Mana đang chảy...";
+
+            const system = isDirect 
+                ? `BẠN LÀ MÁY DỊCH LIGHT NOVEL. Dịch ${from} -> ${to}. Quy tắc: Dịch thẳng, KHÔNG ghi chú, KHÔNG dấu sao (*). Phong cách: ${pmt || 'Văn chương'}.`
+                : `BẠN LÀ BIÊN TẬP VIÊN. Dịch sang ${to} và phân tích cảm xúc đoạn văn. KHÔNG dùng dấu sao (*).`;
 
             try {
-                const r = await fetch(`${API_URL}?key=${k}`, {
+                const res = await fetch(`${API_URL}?key=${key}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         contents: [{ parts: [{ text: input }] }],
                         systemInstruction: { parts: [{ text: system }] }
                     })
                 });
-                const d = await r.json();
-                let txt = d.candidates[0].content.parts[0].text;
-                output.innerText = txt.replace(/\*/g, '');
-            } catch(e) { 
-                output.innerText = "⚠️ Kết nối Mana thất bại! Kiểm tra lại API Key.";
+                const data = await res.json();
+                let resultText = data.candidates[0].content.parts[0].text;
+                output.innerText = resultText.replace(/\*/g, '');
+            } catch(e) {
+                output.innerText = "⚠️ Lỗi: Kiểm tra API Key hoặc mạng.";
             } finally {
                 btn.disabled = false;
-                btn.innerText = type === 'direct' ? 'Triệu Hồi Bản Dịch' : 'Khai Mở Tinh Hoa';
+                btn.innerText = isDirect ? "Bắt Đầu Dịch" : "Phân Tích Ngay";
             }
         }
 
-        async function translateFileContent() {
-            const k = localStorage.getItem('sola_key');
- 
+        async function translateEpub() {
+            const key = localStorage.getItem('sola_key');
+            const box = document.getElementById('preview-box');
+            const text = box.innerText;
+            if(!key || text.length < 10) return alert("Nạp file & API Key trước!");
 
-                
+            const btn = document.getElementById('btn-epub');
+            btn.disabled = true;
+            btn.innerText = "Đang giải mã...";
+
+            const system = "Dịch văn bản sau sang Tiếng Việt phong cách văn học. KHÔNG dùng dấu sao (*).";
+            
+            try {
+                const res = await fetch(`${API_URL}?key=${key}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: text.substring(0, 20000) }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
+                });
+                const data = await res.json();
+                box.innerText = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
+            } catch(e) { alert("Lỗi dịch EPUB!"); }
+            finally {
+                btn.disabled = false;
+                btn.innerText = "Dịch Nội Dung Này";
+            }
+        }
+
+        // Thanh tẩy
+        function purify(lang) {
+            const area = document.getElementById('clean-textarea');
+            let regex;
+            switch(lang) {
+                case 'ja': regex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s\d.,!?"'()-]/g; break;
+                case 'zh': regex = /[\u4E00-\u9FFF\s\d.,!?"'()-]/g; break;
+                case 'ko': regex = /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\s\d.,!?"'()-]/g; break;
+                case 'en': regex = /[a-zA-Z\s\d.,!?"'()-]/g; break;
+            }
+            area.value = (area.value.match(regex) || []).join('');
+        }
+
+        function initParticles() {
+            const bg = document.getElementById('mana-bg');
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.style.cssText = `position:absolute;width:2px;height:2px;background:${Math.random()>0.5?'#4facfe':'#ffd700'};left:${Math.random()*100}vw;top:100vh;border-radius:50%;opacity:0.6;`;
+                p.animate([{transform:'translateY(0)'},{transform:'translateY(-100vh)'}], {duration: 8000});
+        
